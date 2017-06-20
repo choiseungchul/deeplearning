@@ -20,3 +20,4 @@ def MinMaxScaler(data):
     denominator = np.max(data, 0) - np.min(data, 0)
     # noise term prevents the zero division
     return numerator / (denominator + 1e-7)
+
