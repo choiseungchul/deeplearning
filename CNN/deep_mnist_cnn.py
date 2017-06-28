@@ -4,6 +4,8 @@ import tensorflow as tf
 
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
+
+
 X = tf.placeholder(tf.float32, [None, 784])
 X_img = tf.reshape(X, [-1,28,28,1])
 
@@ -67,15 +69,22 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
 trainig_epoch = 2
+# 55000개의 트레이닝 데이터를 100으로 나눠서 실행한다
 batch_size = 100
 
 #train my model
 for epoch in range(trainig_epoch):
     avg_cost = 0
     total_batch = int(mnist.train.num_examples / batch_size)
+
+    print('total batch : ', total_batch)
+
     for i in range(total_batch):
         batch_xs, batch_ys = mnist.train.next_batch(batch_size)
         feed_dict = {X : batch_xs, Y : batch_ys}
+
+        print('feed_dict:', feed_dict)
+
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
     print('Epoch:','%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))

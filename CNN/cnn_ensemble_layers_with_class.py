@@ -2,6 +2,7 @@
 # https://www.tensorflow.org/tutorials/layers
 import tensorflow as tf
 import numpy as np
+import time
 
 from tensorflow.examples.tutorials.mnist import input_data
 
@@ -12,9 +13,11 @@ mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 # more information about the mnist dataset
 
 # hyper parameters
-learning_rate = 0.001
-training_epochs = 20
-batch_size = 100
+learning_rate = 0.01
+training_epochs = 3
+batch_size = 20
+models = []
+num_models = 2
 
 
 class Model:
@@ -98,8 +101,6 @@ class Model:
 # initialize
 sess = tf.Session()
 
-models = []
-num_models = 2
 for m in range(num_models):
     models.append(Model(sess, "model" + str(m)))
 
@@ -120,6 +121,7 @@ for epoch in range(training_epochs):
             avg_cost_list[m_idx] += c / total_batch
 
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', avg_cost_list)
+    print(time.strftime("%H:%M:%S"))
 
 print('Learning Finished!')
 
