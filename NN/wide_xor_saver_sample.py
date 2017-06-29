@@ -29,14 +29,14 @@ W2 = tf.Variable(tf.random_normal([10, 1]), name='weight2')
 b2 = tf.Variable(tf.random_normal([1]), name='bias2')
 hypo = tf.sigmoid(tf.matmul(layer1, W2) + b2)
 
-saver = tf.train.Saver( [ W1, b1, W2, b2 ] )
 
 cost = -tf.reduce_mean(Y * tf.log(hypo) + (1-Y) * tf.log(1 - hypo))
 
-train = tf.train.GradientDescentOptimizer(learning_rate=0.1).minimize(cost)
-
 pred = tf.cast(hypo > 0.5, dtype=tf.float32)
 accu = tf.reduce_mean(tf.cast(tf.equal(pred, Y), dtype=tf.float32))
+
+saver = tf.train.Saver()
+train = tf.train.GradientDescentOptimizer(learning_rate=0.1).minimize(cost)
 
 with tf.Session() as sess:
 
@@ -47,12 +47,15 @@ with tf.Session() as sess:
         sess.run(train, feed_dict={X:x_data, Y :y_data})
 
         if step % 100 == 0:
-            saver.save(sess, './saved_vars/wide_xor_saved/train_data', global_step=step)
+
             print(step, sess.run(cost, feed_dict={Y:y_data, X:x_data}), sess.run([W1, W2]), 'bias1:', sess.run(b1))
 
 
     # train complete
     h, c, a = sess.run([hypo, pred, accu], feed_dict={X: x_data, Y:y_data})
+
+    save_path = saver.save(sess, './saved_vars/wide_xor_saved/train_data.ckpt')
+    print(save_path)
 
     print('h:',h, 'cost:',c, "accuracy:",a)
 
