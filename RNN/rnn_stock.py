@@ -18,3 +18,4 @@ data_x = []
 data_y = []
 
 for i in range(0, len(y) - seq_len):
+    print('')

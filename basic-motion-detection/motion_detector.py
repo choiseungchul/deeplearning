@@ -8,10 +8,15 @@ import datetime
 import imutils
 import time
 import cv2
+import os
+import requests
+
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
+# 비디오 크기
 ap.add_argument("-v", "--video", help="path to the video file")
+# 감지 움직임 거리
 ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
 args = vars(ap.parse_args())
 
@@ -23,7 +28,9 @@ args = vars(ap.parse_args())
 # # otherwise, we are reading from a video file
 # else:
 
-camera = cv2.VideoCapture("./videos/example_02.mp4")
+dir_path = os.path.dirname(os.path.realpath(__file__))
+#camera = cv2.VideoCapture(dir_path + "/videos/example_02.mp4")
+camera = cv2.VideoCapture(0)
 
 # initialize the first frame in the video stream
 firstFrame = None
@@ -43,7 +50,7 @@ while True:
 		break
 
 	# resize the frame, convert it to grayscale, and blur it
-	frame = imutils.resize(frame, width=500)
+	frame = imutils.resize(frame, width=640)
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
@@ -53,17 +60,20 @@ while True:
 		continue
 
 	# compute the absolute difference between the current frame and
-	# first frame
+	# first framedddd
 	frameDelta = cv2.absdiff(firstFrame, gray)
-	thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
+	#thresh = cv2.threshold(frameDelta, 35, 255, cv2.THRESH_BINARY_INV)[1]
+	thresh = cv2.threshold(frameDelta, 105, 255, cv2.THRESH_BINARY)[1]
 
 	# dilate the thresholded image to fill in holes, then find contours
 	# on thresholded image
 	thresh = cv2.dilate(thresh, None, iterations=2)
 	image, contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+	chkcnt = 0
 	# loop over the contours
 	for c in contours:
+		chkcnt += 1
 		# if the contour is too small, ignore it
 		if cv2.contourArea(c) < args["min_area"]:
 			continue
@@ -72,8 +82,20 @@ while True:
 		# and update the text
 		(x, y, w, h) = cv2.boundingRect(c)
 
+		print('checked moving object: ', x, y, w , h)
+
 		cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 		text = "Occupied"
+
+		# if(chkcnt > 3):
+		# 	cv2.imwrite('img_CV2_90.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+		# 	url = 'http://api.vr-storm.net/arc_api/v1/save_target.php'
+		# 	files = {'file': open('img_CV2_90.jpg', 'rb')}
+		# 	r = requests.post(url, files=files)
+		# 	print(r)
+		# 	chkcnt = 0
+		# 	break
+
 
 	# draw the text and timestamp on the frame
 	cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
@@ -94,3 +116,4 @@ while True:
 # cleanup the camera and close any open windows
 camera.release()
 cv2.destroyAllWindows()
+
